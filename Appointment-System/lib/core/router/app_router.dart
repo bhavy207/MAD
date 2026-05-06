@@ -38,6 +38,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const BookingScreen(),
       ),
       GoRoute(
+        path: '/book/:id',
+        builder: (context, state) => BookingScreen(
+          appointmentId: state.pathParameters['id'],
+        ),
+      ),
+      GoRoute(
         path: '/queue',
         builder: (context, state) => const QueueStatusScreen(),
       ),

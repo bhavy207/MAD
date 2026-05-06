@@ -25,11 +25,12 @@ class AppointmentNotifier extends StateNotifier<List<Map<String, dynamic>>> {
   }
 
   // ── User: Add appointment ─────────────────────────────────────────────────
-  void addAppointment(String service, DateTime date, String time, String name) {
+  void addAppointment(String service, DateTime date, String time, String name, String doctorName) {
     final newAppointment = {
       'id': _uuid.v4(),
       'name': name,
       'service': service,
+      'doctor': doctorName,
       'date': date.toIso8601String(),
       'time': time,
       'status': 'upcoming',
@@ -57,6 +58,13 @@ class AppointmentNotifier extends StateNotifier<List<Map<String, dynamic>>> {
   // ── User: Cancel ──────────────────────────────────────────────────────────
   void cancelAppointment(String id) =>
       _updateAppointmentField(id, {'status': 'cancelled'});
+
+  // ── User: Reschedule (update date + time) ─────────────────────────────────
+  void rescheduleAppointment(String id, DateTime newDate, String newTime) =>
+      _updateAppointmentField(id, {
+        'date': newDate.toIso8601String(),
+        'time': newTime,
+      });
 
   // ── Admin: Complete appointment ───────────────────────────────────────────
   void completeAppointment(String id) =>
