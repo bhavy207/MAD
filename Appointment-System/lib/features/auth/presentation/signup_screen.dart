@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatelessWidget {
+  const SignupScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +27,10 @@ class LoginScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.queue_rounded, size: 80, color: AppColors.primary),
+                  const Icon(Icons.person_add_alt_1_rounded, size: 80, color: AppColors.primary),
                   const SizedBox(height: 16),
                   const Text(
-                    "SmartQueue",
+                    "Create Account",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 32,
@@ -40,7 +40,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    "Precision waiting for modern business.",
+                    "Join SmartQueue today.",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
@@ -57,7 +57,7 @@ class LoginScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const Text(
-                            "Welcome back",
+                            "Sign Up",
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -65,14 +65,21 @@ class LoginScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            "Sign in to manage your appointments.",
+                            "Enter your details to create an account.",
                             style: TextStyle(color: Colors.grey),
                           ),
                           const SizedBox(height: 24),
                           TextFormField(
                             decoration: const InputDecoration(
-                              labelText: "Mobile Number or Email",
-                              prefixIcon: Icon(Icons.person_outline),
+                              labelText: "Full Name",
+                              prefixIcon: Icon(Icons.person),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              labelText: "Email or Mobile",
+                              prefixIcon: Icon(Icons.email_outlined),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -84,22 +91,6 @@ class LoginScreen extends StatelessWidget {
                               suffixIcon: Icon(Icons.visibility_off),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Switch(value: true, onChanged: (v) {}, activeColor: AppColors.primary),
-                                  const Text("Remember me", style: TextStyle(fontSize: 12)),
-                                ],
-                              ),
-                              TextButton(
-                                onPressed: () {},
-                                child: const Text("Forgot password?", style: TextStyle(fontSize: 12)),
-                              ),
-                            ],
-                          ),
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: () => context.go('/home'),
@@ -109,28 +100,16 @@ class LoginScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text("Login", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          ),
-                          const SizedBox(height: 16),
-                          OutlinedButton(
-                            onPressed: () => context.go('/home'),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              side: const BorderSide(color: AppColors.primary),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text("Continue as Guest"),
+                            child: const Text("Sign Up", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ),
                           const SizedBox(height: 16),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text("Don't have an account?"),
+                              const Text("Already have an account?"),
                               TextButton(
-                                onPressed: () => context.go('/signup'),
-                                child: const Text("Sign Up"),
+                                onPressed: () => context.go('/login'),
+                                child: const Text("Login"),
                               ),
                             ],
                           ),
