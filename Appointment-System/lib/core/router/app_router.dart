@@ -11,6 +11,7 @@ import '../../features/appointments/presentation/appointment_list_screen.dart';
 import '../../features/appointments/presentation/search_filter_screen.dart';
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
 import '../../features/sync/presentation/offline_sync_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -55,6 +56,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/sync',
         builder: (context, state) => const OfflineSyncScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

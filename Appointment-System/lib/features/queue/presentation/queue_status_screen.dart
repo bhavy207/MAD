@@ -1,11 +1,28 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 
-class QueueStatusScreen extends StatelessWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/providers/appointment_provider.dart';
+
+class QueueStatusScreen extends ConsumerWidget {
   const QueueStatusScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(appointmentProvider);
+    final upcomingAppts = ref.read(appointmentProvider.notifier).upcoming;
+    final hasUpcoming = upcomingAppts.isNotEmpty;
+    final myToken = hasUpcoming ? upcomingAppts.first['queueNumber'] as String : "#A-104";
+    
+    int myNumber = 104;
+    try {
+      myNumber = int.parse(myToken.split('-').last);
+    } catch (_) {}
+
+    final servingNumber = myNumber > 100 ? myNumber - 2 : myNumber;
+    final servingToken = "#A-$servingNumber";
+    final peopleAhead = myNumber > servingNumber ? myNumber - servingNumber - 1 : 0;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Live Queue'),
@@ -45,9 +62,9 @@ class QueueStatusScreen extends StatelessWidget {
               const SizedBox(height: 40),
               const Text("Currently Serving", style: TextStyle(fontSize: 16, color: Colors.grey)),
               const SizedBox(height: 8),
-              const Text(
-                "#A-102",
-                style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.primary),
+              Text(
+                servingToken,
+                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.primary),
               ),
               const SizedBox(height: 40),
               Card(
@@ -57,8 +74,8 @@ class QueueStatusScreen extends StatelessWidget {
                     children: [
                       const Text("Your Token", style: TextStyle(fontSize: 16, color: Colors.grey)),
                       const SizedBox(height: 8),
-                      const Text(
-                        "#A-104",
+                      Text(
+                        myToken,
                         style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 24),
@@ -74,18 +91,18 @@ class QueueStatusScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Column(
-                            children: const [
-                              Text("People Ahead", style: TextStyle(color: Colors.grey, fontSize: 12)),
-                              SizedBox(height: 4),
-                              Text("1", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                            children: [
+                              const Text("People Ahead", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                              const SizedBox(height: 4),
+                              Text("$peopleAhead", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                             ],
                           ),
                           Container(width: 1, height: 40, color: Colors.grey[300]),
                           Column(
-                            children: const [
-                              Text("Est. Wait Time", style: TextStyle(color: Colors.grey, fontSize: 12)),
-                              SizedBox(height: 4),
-                              Text("15m", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                            children: [
+                              const Text("Est. Wait Time", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                              const SizedBox(height: 4),
+                              Text("${peopleAhead * 15}m", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ],
@@ -100,10 +117,11 @@ class QueueStatusScreen extends StatelessWidget {
                 child: Text("Queue Timeline", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(height: 16),
-              _QueueItem(token: "#A-101", status: "Completed", isCurrent: false),
-              _QueueItem(token: "#A-102", status: "Serving", isCurrent: true),
-              _QueueItem(token: "#A-103", status: "Next", isCurrent: false),
-              _QueueItem(token: "#A-104", status: "You", isCurrent: false, isYou: true),
+              _QueueItem(token: "#A-${servingNumber - 1}", status: "Completed", isCurrent: false),
+              _QueueItem(token: servingToken, status: "Serving", isCurrent: true),
+              if (peopleAhead > 0)
+                _QueueItem(token: "#A-${servingNumber + 1}", status: "Next", isCurrent: false),
+              _QueueItem(token: myToken, status: "You", isCurrent: false, isYou: true),
             ],
           ),
         ),

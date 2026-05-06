@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 
-class BookingScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/appointment_provider.dart';
+
+class BookingScreen extends ConsumerStatefulWidget {
   const BookingScreen({super.key});
 
   @override
-  State<BookingScreen> createState() => _BookingScreenState();
+  ConsumerState<BookingScreen> createState() => _BookingScreenState();
 }
 
-class _BookingScreenState extends State<BookingScreen> {
+class _BookingScreenState extends ConsumerState<BookingScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController(text: "Alex Smith");
   String _selectedService = 'General Consultation';
   DateTime _selectedDate = DateTime.now();
   String _selectedSlot = '10:30 AM';
@@ -43,11 +47,11 @@ class _BookingScreenState extends State<BookingScreen> {
               ),
               const SizedBox(height: 24),
               TextFormField(
+                controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: "Full Name",
                   prefixIcon: Icon(Icons.person_outline),
                 ),
-                initialValue: "Alex Smith",
                 validator: (value) => value!.isEmpty ? 'Please enter your name' : null,
               ),
               const SizedBox(height: 16),
@@ -191,11 +195,20 @@ class _BookingScreenState extends State<BookingScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
+                      ref.read(appointmentProvider.notifier).addAppointment(
+                        _selectedService,
+                        _selectedDate,
+                        _selectedSlot,
+                        _nameController.text,
+                      );
+                      
+                      final queueNumber = ref.read(appointmentProvider.notifier).state.last['queueNumber'];
+
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
                           title: const Text("Success"),
-                          content: const Text("Appointment booked successfully!\nYour Queue Number is #A-105."),
+                          content: Text("Appointment booked successfully!\nYour Queue Number is $queueNumber."),
                           actions: [
                             TextButton(
                               onPressed: () {

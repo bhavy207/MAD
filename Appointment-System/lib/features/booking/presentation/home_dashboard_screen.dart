@@ -1,27 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/providers/appointment_provider.dart';
+import '../../../core/providers/user_provider.dart';
 
-class HomeDashboardScreen extends StatelessWidget {
+class HomeDashboardScreen extends ConsumerWidget {
   const HomeDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(appointmentProvider); // Rebuild when list changes
+    final upcomingAppts = ref.read(appointmentProvider.notifier).upcoming;
+    final hasUpcoming = upcomingAppts.isNotEmpty;
+    final nextAppt = hasUpcoming ? upcomingAppts.first : null;
+    final user = ref.watch(userProvider);
+    final userName = user.name.isNotEmpty ? user.name : 'Guest';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('SmartQueue'),
         leading: IconButton(
           icon: const Icon(Icons.person),
-          onPressed: () {},
+          onPressed: () => context.push('/settings'),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {},
           ),
+          if (user.isAdmin)
+            IconButton(
+              icon: const Icon(Icons.admin_panel_settings),
+              onPressed: () => context.push('/admin'),
+              tooltip: 'Admin Panel',
+            ),
           IconButton(
-            icon: const Icon(Icons.admin_panel_settings_outlined),
-            onPressed: () => context.push('/admin'),
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push('/settings'),
+            tooltip: 'Settings',
           ),
         ],
       ),
@@ -30,9 +47,9 @@ class HomeDashboardScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Hello, Alex!",
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            Text(
+              "Hello, $userName! 👋",
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -40,77 +57,94 @@ class HomeDashboardScreen extends StatelessWidget {
               style: TextStyle(color: Colors.grey, fontSize: 16),
             ),
             const SizedBox(height: 24),
-            // Upcoming Appointment Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, AppColors.secondary],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            if (hasUpcoming)
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.secondary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    )
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  )
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Text(
+                            "IN PROGRESS",
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
                         ),
-                        child: const Text(
-                          "IN PROGRESS",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                        const Icon(Icons.cloud_done, color: Colors.white, size: 20),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Dr. Sarah Jenkins",
+                      style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      nextAppt?['service'] ?? '',
+                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Your Token", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                            Text(nextAppt?['queueNumber'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                          ],
                         ),
-                      ),
-                      const Icon(Icons.cloud_done, color: Colors.white, size: 20),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    "Dr. Sarah Jenkins",
-                    style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    "General Consultation",
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text("Your Token", style: TextStyle(color: Colors.white70, fontSize: 12)),
-                          Text("#A-104", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: const [
-                          Text("Est. Wait", style: TextStyle(color: Colors.white70, fontSize: 12)),
-                          Text("15 mins", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const Text("Time", style: TextStyle(color: Colors.white70, fontSize: 12)),
+                            Text(nextAppt?['time'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(Icons.event_busy, size: 48, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    const Text("No upcoming appointments", style: TextStyle(color: Colors.grey, fontSize: 16)),
+                  ],
+                ),
               ),
-            ),
             const SizedBox(height: 32),
             const Text(
               "Quick Actions",

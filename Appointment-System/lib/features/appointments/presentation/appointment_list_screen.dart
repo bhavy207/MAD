@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/providers/appointment_provider.dart';
 
-class AppointmentListScreen extends StatelessWidget {
+class AppointmentListScreen extends ConsumerWidget {
   const AppointmentListScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -46,19 +49,32 @@ class AppointmentListScreen extends StatelessWidget {
   }
 }
 
-class _AppointmentList extends StatelessWidget {
+class _AppointmentList extends ConsumerWidget {
   final String type;
 
   const _AppointmentList({required this.type});
 
   @override
-  Widget build(BuildContext context) {
-    // Mock Data
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.watch(appointmentProvider.notifier);
     final isUpcoming = type == "upcoming";
+    final appointments = type == "upcoming" 
+        ? notifier.upcoming 
+        : (type == "completed" ? notifier.completed : notifier.cancelled);
+
+    if (appointments.isEmpty) {
+      return Center(
+        child: Text("No $type appointments found.", style: const TextStyle(color: Colors.grey)),
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: isUpcoming ? 2 : 1,
+      itemCount: appointments.length,
       itemBuilder: (context, index) {
+        final appt = appointments[index];
+        final dateObj = DateTime.parse(appt['date']);
+        final formattedDate = DateFormat('MMM d, yyyy').format(dateObj);
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
           child: Padding(
@@ -70,7 +86,7 @@ class _AppointmentList extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Oct 12, 2024 • 10:30 AM",
+                      "$formattedDate • ${appt['time']}",
                       style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                     Container(
@@ -91,9 +107,9 @@ class _AppointmentList extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  "General Consultation",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  appt['service'],
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 const Text(
@@ -105,7 +121,7 @@ class _AppointmentList extends StatelessWidget {
                   children: [
                     const Icon(Icons.confirmation_number_outlined, size: 16, color: Colors.grey),
                     const SizedBox(width: 8),
-                    const Text("Queue: #A-104"),
+                    Text("Queue: ${appt['queueNumber']}"),
                     const Spacer(),
                     if (isUpcoming) ...[
                       TextButton(
@@ -113,7 +129,9 @@ class _AppointmentList extends StatelessWidget {
                         child: const Text("Reschedule"),
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          ref.read(appointmentProvider.notifier).cancelAppointment(appt['id']);
+                        },
                         style: TextButton.styleFrom(foregroundColor: AppColors.error),
                         child: const Text("Cancel"),
                       ),
